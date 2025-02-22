@@ -5,8 +5,7 @@ import { useTheme } from "@mui/material/styles"; // Import theme hook
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-const DataTable = ({ filteredData, fileId }) => {
-  const [data, setData] = useState([]);
+const DataTable = ({ filteredData, setFilteredData, fileId }) => {
   const [page, setPage] = useState(1);
   const [offset, setOffset] = useState(25); // Default offset
   const [loading, setLoading] = useState(true);
@@ -25,16 +24,19 @@ const DataTable = ({ filteredData, fileId }) => {
       console.log("Backend Response:", response.data); // DEBUGGING LOG
 
       if (response.data.records && Array.isArray(response.data.records)) {
-        setData(response.data.records);
+        let records = response.data.records;
+        console.log("records", records);  // DEBUGGING LOG
+        setFilteredData(records);
+        console.log("filtered", filteredData);  // DEBUGGING LOG
         setTotalPages(response.data.totalPages || 1); // Update total pages from API response
       } else {
         console.warn("Unexpected data format:", response.data);
-        setData([]); // Avoid undefined issues
+        setFilteredData([]); // Avoid undefined issues
         setTotalPages(1);
       }
     } catch (error) {
       console.error("Error fetching file data:", error);
-      setData([]);
+      setFilteredData([]);
       setTotalPages(1);
     }
     setLoading(false);
@@ -42,14 +44,10 @@ const DataTable = ({ filteredData, fileId }) => {
 
   // Fetch data when fileId, page, or offset changes
   useEffect(() => {
-    if (!filteredData) {
+    if (filteredData.length === 0) {
       fetchFileData();
-    } else {
-      console.log("Using Filtered Data:", filteredData);
-      setData(filteredData);
-      setLoading(false);
     }
-  }, [page, offset, filteredData, fileId]);
+  }, [page, offset, fileId]);
 
   return (
     <Paper sx={{ p: 3, mt: 3, position: "relative"}}>
@@ -119,8 +117,8 @@ const DataTable = ({ filteredData, fileId }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {data.length > 0 ? (
-                    data.map((row, index) => (
+                  {filteredData.length > 0 ? (
+                    filteredData.map((row, index) => (
                       <TableRow key={index}>
                         <TableCell sx={{ color: darkMode ? "#fff" : "#000" }}>{row.timestamp || "N/A"}</TableCell>
                         <TableCell align="right" sx={{ color: darkMode ? "#fff" : "#000" }}>{row.temperature || "N/A"}</TableCell>

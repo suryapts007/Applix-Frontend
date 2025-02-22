@@ -3,11 +3,12 @@ import { useParams } from "react-router-dom";
 import { Container, Typography, Paper } from "@mui/material";
 import FilterByTime from "../components/FilterByTime";
 import DataTable from "../components/DataTable";
+import DataChart from "../components/DataChart";
 import ThemeToggle from "../components/ThemeToggle";
 
 const FileDetailsPage = () => {
   const { fileId } = useParams();
-  const [filteredData, setFilteredData] = useState(null);
+  const [filteredData, setFilteredData] = useState([]);
 
   return (
     <Container maxWidth="md" sx={{ mt: 5 }}>
@@ -20,7 +21,10 @@ const FileDetailsPage = () => {
         <FilterByTime setFilteredData={setFilteredData} />
 
         {/* Data Table (Pass fileId for backend request) */}
-        <DataTable filteredData={filteredData} fileId={fileId} />
+        <DataTable filteredData={filteredData} setFilteredData={setFilteredData} fileId={fileId} />
+
+        {/* Data Charts */}
+        <DataChart records={filteredData || []} />
       </Paper>
     </Container>
   );
