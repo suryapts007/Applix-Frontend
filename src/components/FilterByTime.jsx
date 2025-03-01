@@ -3,13 +3,10 @@ import { Button, Box, Typography, TextField } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { getDataByTimeDelta } from "../services/api";
 import { ThemeContext } from "../context/ThemeContext";
 
-const FilterByTime = ({ setFilteredData }) => {
+const FilterByTime = ({ setFilteredData, startTime, endTime, setStartTime, setEndTime, triggerFetch }) => {
   const { darkMode } = useContext(ThemeContext);
-  const [startTime, setStartTime] = useState(null);
-  const [endTime, setEndTime] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -18,25 +15,16 @@ const FilterByTime = ({ setFilteredData }) => {
       setError("❌ Please select both start and end time.");
       return;
     }
-
-    setLoading(true);
     setError("");
-
-    try {
-      const response = await getDataByTimeDelta(startTime.toISOString(), endTime.toISOString());
-      setFilteredData(response.data);
-    } catch (error) {
-      setError("❌ Error fetching filtered data.");
-    }
-
-    setLoading(false);
+    triggerFetch();
   };
 
   const handleReset = () => {
     setStartTime(null);
     setEndTime(null);
-    setFilteredData(null); // Reset table to show all data
+    setFilteredData([]);
     setError("");
+    triggerFetch();
   };
 
   return (
@@ -47,7 +35,7 @@ const FilterByTime = ({ setFilteredData }) => {
 
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <DateTimePicker
-          label="Start Time"
+          label="Start Time (IST)"
           value={startTime}
           onChange={(newValue) => setStartTime(newValue)}
           renderInput={(params) => (
@@ -55,7 +43,7 @@ const FilterByTime = ({ setFilteredData }) => {
           )}
         />
         <DateTimePicker
-          label="End Time"
+          label="End Time (IST)"
           value={endTime}
           onChange={(newValue) => setEndTime(newValue)}
           renderInput={(params) => (

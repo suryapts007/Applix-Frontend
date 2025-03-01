@@ -5,7 +5,7 @@ import { useTheme } from "@mui/material/styles"; // Import theme hook
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
-const DataTable = ({ filteredData, setFilteredData, fileId }) => {
+const DataTable = ({ filteredData, setFilteredData, fileId, startTime, endTime, fetchTrigger }) => {
   const [page, setPage] = useState(1);
   const [offset, setOffset] = useState(25); // Default offset
   const [loading, setLoading] = useState(true);
@@ -20,14 +20,11 @@ const DataTable = ({ filteredData, setFilteredData, fileId }) => {
     if (!fileId) return;
     setLoading(true);
     try {
-      const response = await getData(fileId, page, offset);
-      console.log("Backend Response:", response.data); // DEBUGGING LOG
+      const response = await getData(fileId, page, offset, startTime, endTime);
 
       if (response.data.records && Array.isArray(response.data.records)) {
         let records = response.data.records;
-        console.log("records", records);  // DEBUGGING LOG
         setFilteredData(records);
-        console.log("filtered", filteredData);  // DEBUGGING LOG
         setTotalPages(response.data.totalPages || 1); // Update total pages from API response
       } else {
         console.warn("Unexpected data format:", response.data);
@@ -44,10 +41,8 @@ const DataTable = ({ filteredData, setFilteredData, fileId }) => {
 
   // Fetch data when fileId, page, or offset changes
   useEffect(() => {
-    if (filteredData.length === 0) {
-      fetchFileData();
-    }
-  }, [page, offset, fileId]);
+      fetchFileData(); 
+  }, [page, offset, fileId, fetchTrigger]);
 
   return (
     <Paper sx={{ p: 3, mt: 3, position: "relative"}}>

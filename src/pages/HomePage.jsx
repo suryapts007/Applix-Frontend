@@ -42,7 +42,7 @@ const HomePage = () => {
           📂 Upload a File
         </Typography>
         <Box sx={{ border: "2px dashed #90caf9", padding: 3, borderRadius: "8px", backgroundColor: darkMode ? "#2a2a2a" : "#f5f5f5" }}>
-          <FileUpload />
+          <FileUpload fetchFiles={fetchFiles} />
         </Box>
       </Paper>
 

@@ -3,13 +3,14 @@ import { Button, CircularProgress, Typography, Box } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { uploadFile } from "../services/api";
 
-const FileUpload = () => {
+const FileUpload = ({ fetchFiles }) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
+    setMessage(`📄 ${event.target.files[0].name} is ready to upload`);
   };
 
   const handleUpload = async () => {
@@ -21,6 +22,7 @@ const FileUpload = () => {
     try {
       await uploadFile(file);
       setMessage("✅ File uploaded successfully!");
+      fetchFiles(); // Refresh the files list
     } catch (error) {
       setMessage("❌ Upload failed!");
     }
