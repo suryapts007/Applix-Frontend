@@ -1,8 +1,15 @@
-# React + Vite
+# Frontend Setup
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 1. Clone the Repository and Install Dependencies
+```sh
+git clone https://github.com/suryapts007/Applix-Frontend.git
+cd Applix-Frontend
+npm install
+```
 
-Currently, two official plugins are available:
+## 2. Start the Frontend Server
+```sh
+npm run dev
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Once started, the frontend will be accessible at: [http://localhost:3000](http://localhost:3000)

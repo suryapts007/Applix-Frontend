@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import RefreshIcon from "@mui/icons-material/Refresh"; // Refresh button
 import CloudDoneIcon from "@mui/icons-material/CloudDone"; // Ready icon
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty"; // Processing icon
+import OpenInNewIcon from "@mui/icons-material/OpenInNew"; // Import the icon
 import FileUpload from "../components/FileUpload";
 import { getUploadedFiles } from "../services/api";
 import ThemeToggle from "../components/ThemeToggle";
@@ -81,7 +82,7 @@ const HomePage = () => {
                   padding: "0px 12px", // Reduce padding for a compact look
                   opacity: file.status === 0 ? 0.5 : 1, // Make processing files look disabled
                 }}
-                onClick={file.status === 1 ? () => window.open(`/file/${file.id}`, "_blank") : null} // Open in a new tab if ready
+                onClick={file.status === 1 ? () => window.open(`/file/${file.id}`, "_self") : null} // Open in the same tab if ready
               >
                 <CardContent sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px" }}>
                   <Box>
@@ -93,10 +94,24 @@ const HomePage = () => {
                     </Typography>
                   </Box>
                   
-                  {file.status === 1 ? (
+                  {/* {file.status === 1 ? (
                     <CloudDoneIcon sx={{ color: "#4caf50", fontSize: 20 }} />
                   ) : (
                     <HourglassEmptyIcon sx={{ color: "#ff9800", fontSize: 20 }} />
+                  )} */}
+                  
+                  {file.status === 1 && (
+                    <Tooltip title="Open in new tab">
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent triggering the card's onClick
+                          window.open(`/file/${file.id}`, "_blank");
+                        }}
+                        sx={{ ml: 1 }}
+                      >
+                        <OpenInNewIcon sx={{ fontSize: 20 }} />
+                      </IconButton>
+                    </Tooltip>
                   )}
                 </CardContent>
               </Card>
