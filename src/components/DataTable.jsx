@@ -1,62 +1,74 @@
 import React, { useEffect, useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Pagination, Typography, CircularProgress, Box, FormControl, InputLabel, Select, MenuItem, IconButton, Collapse } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Pagination, Typography, CircularProgress, Box, FormControl, Select, MenuItem, IconButton, Collapse } from "@mui/material";
 import { getData } from "../services/api";
-import { useTheme } from "@mui/material/styles"; // Import theme hook
+import { useTheme } from "@mui/material/styles";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 const DataTable = ({ filteredData, setFilteredData, fileId, startTime, endTime, fetchTrigger }) => {
   const [page, setPage] = useState(1);
-  const [offset, setOffset] = useState(25); // Default offset
+  const [offset, setOffset] = useState(25);
   const [loading, setLoading] = useState(true);
-  const [totalPages, setTotalPages] = useState(1); // Store total pages from API
-  const [expanded, setExpanded] = useState(true); // State to toggle collapse
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
+  const [totalFilteredRows, setTotalFilteredRows] = useState(0);
+  const [meanTemperature, setMeanTemperature] = useState(0);
+  const [medianTemperature, setMedianTemperature] = useState(0);
+  const [expanded, setExpanded] = useState(true);
 
-  const theme = useTheme(); // Get current theme
-  const darkMode = theme.palette.mode === "dark"; // Check if dark mode is enabled
+  const theme = useTheme();
+  const darkMode = theme.palette.mode === "dark";
 
-  // Fetch Data from Backend
   const fetchFileData = async () => {
     if (!fileId) return;
     setLoading(true);
     try {
-      console.log("startTime ", startTime)
       const response = await getData(fileId, page, offset, startTime, endTime);
 
       if (response.data.records && Array.isArray(response.data.records)) {
         let records = response.data.records;
         setFilteredData(records);
-        setTotalPages(response.data.totalPages || 1); // Update total pages from API response
+        setTotalPages(response.data.totalPages || 1);
+        setTotalRows(response.data.totalRows || 0);
+        setTotalFilteredRows(response.data.totalFilteredRows || 0);
+        setMeanTemperature(response.data.meanTemperature || 0);
+        setMedianTemperature(response.data.medianTemperature || 0);
       } else {
         console.warn("Unexpected data format:", response.data);
-        setFilteredData([]); // Avoid undefined issues
+        setFilteredData([]);
         setTotalPages(1);
+        setTotalRows(0);
+        setTotalFilteredRows(0);
+        setMeanTemperature(0);
+        setMedianTemperature(0);
       }
     } catch (error) {
       console.error("Error fetching file data:", error);
       setFilteredData([]);
       setTotalPages(1);
+      setTotalRows(0);
+      setTotalFilteredRows(0);
+      setMeanTemperature(0);
+      setMedianTemperature(0);
     }
     setLoading(false);
   };
 
-  // Fetch data when fileId, page, or offset changes
   useEffect(() => {
-      fetchFileData(); 
+    fetchFileData();
   }, [page, offset, fileId, fetchTrigger]);
 
   return (
-    <Paper sx={{ p: 3, mt: 3, position: "relative"}}>
-      {/* Collapse Toggle Button - Positioned at Left Top Side */}
+    <Paper sx={{ p: 3, mt: 3, position: "relative", borderRadius: "12px", boxShadow: 3 }}>
       <IconButton
         onClick={() => setExpanded(!expanded)}
         sx={{
           position: "absolute",
           top: -12,
           left: -12,
-          backgroundColor: "rgb(173, 135, 197)", // Violet background
+          backgroundColor: "rgb(173, 135, 197)",
           color: "#fff",
-          border: "1px solid rgb(133, 98, 155)", // Darker violet border
+          border: "1px solid rgb(133, 98, 155)",
           borderRadius: "50%",
           width: 26,
           height: 26,
@@ -69,16 +81,12 @@ const DataTable = ({ filteredData, setFilteredData, fileId, startTime, endTime, 
         {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
       </IconButton>
 
-      {/* Header with Collapse Toggle */}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>📊 Filtered Data</Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h4" sx={{ flexGrow: 1, color: darkMode ? "#90caf9" : "#000" }}>📊 Filtered Data</Typography>
       </Box>
 
-
       <Collapse in={expanded}>
-        {/* Adjust layout to prevent overlap */}
         <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" mb={2}>
-          {/* Offset Selection Dropdown */}
           <FormControl size="small" sx={{ minWidth: 100, maxWidth: 120, ml: "auto" }}>
             <Select
               value={offset}
@@ -102,38 +110,45 @@ const DataTable = ({ filteredData, setFilteredData, fileId, startTime, endTime, 
         {loading ? (
           <CircularProgress sx={{ display: "block", margin: "20px auto" }} />
         ) : (
-          // Scrollable Table with Border
-          <Box sx={{ border: "2px solid #90caf9", borderRadius: "8px", padding: "8px", overflow: "hidden" }}>
-            <TableContainer sx={{ maxHeight: 400, overflowY: "auto" }}>
-              <Table stickyHeader>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: "#eeeeee" }}>
-                    <TableCell sx={{ color: darkMode ? "#fff" : "#000" }}><strong>Timestamp</strong></TableCell>
-                    <TableCell align="right" sx={{ color: darkMode ? "#fff" : "#000" }}><strong>Temperature (°C)</strong></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {filteredData.length > 0 ? (
-                    filteredData.map((row, index) => (
-                      <TableRow key={index}>
-                        <TableCell sx={{ color: darkMode ? "#fff" : "#000" }}>{row.timestampInstant || "N/A"}</TableCell>
-                        <TableCell align="right" sx={{ color: darkMode ? "#fff" : "#000" }}>{row.temperature || "N/A"}</TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={2} align="center" sx={{ color: darkMode ? "#fff" : "#000" }}>
-                        No data available
-                      </TableCell>
+          <>
+            <Box sx={{ mb: 2, p: 2, borderRadius: "8px", backgroundColor: darkMode ? "#333" : "#f5f5f5" }}>
+              <Typography variant="body1" sx={{ color: darkMode ? "#90caf9" : "#000" }}>Total Rows: {totalRows}</Typography>
+              <Typography variant="body1" sx={{ color: darkMode ? "#90caf9" : "#000" }}>Total Filtered Rows: {totalFilteredRows}</Typography>
+              <Typography variant="body1" sx={{ color: darkMode ? "#90caf9" : "#000" }}>Mean Temperature: {meanTemperature.toFixed(2)} °C</Typography>
+              <Typography variant="body1" sx={{ color: darkMode ? "#90caf9" : "#000" }}>Median Temperature: {medianTemperature.toFixed(2)} °C</Typography>
+            </Box>
+
+            <Box sx={{ border: "2px solid #90caf9", borderRadius: "8px", padding: "8px", overflow: "hidden" }}>
+              <TableContainer sx={{ maxHeight: 400, overflowY: "auto" }}>
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: darkMode ? "#444" : "#eeeeee" }}>
+                      <TableCell sx={{ color: darkMode ? "#fff" : "#000" }}><strong>Timestamp</strong></TableCell>
+                      <TableCell align="right" sx={{ color: darkMode ? "#fff" : "#000" }}><strong>Temperature (°C)</strong></TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
+                  </TableHead>
+                  <TableBody>
+                    {filteredData.length > 0 ? (
+                      filteredData.map((row, index) => (
+                        <TableRow key={index}>
+                          <TableCell sx={{ color: darkMode ? "#fff" : "#000" }}>{row.timestampInstant || "N/A"}</TableCell>
+                          <TableCell align="right" sx={{ color: darkMode ? "#fff" : "#000" }}>{row.temperature || "N/A"}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={2} align="center" sx={{ color: darkMode ? "#fff" : "#000" }}>
+                          No data available
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          </>
         )}
 
-        {/* Pagination with dynamic total page count */}
         <Pagination 
           count={totalPages} 
           page={page} 
