@@ -20,6 +20,7 @@ const DataTable = ({ filteredData, setFilteredData, fileId, startTime, endTime, 
     if (!fileId) return;
     setLoading(true);
     try {
+      console.log("startTime ", startTime)
       const response = await getData(fileId, page, offset, startTime, endTime);
 
       if (response.data.records && Array.isArray(response.data.records)) {
@@ -115,7 +116,7 @@ const DataTable = ({ filteredData, setFilteredData, fileId, startTime, endTime, 
                   {filteredData.length > 0 ? (
                     filteredData.map((row, index) => (
                       <TableRow key={index}>
-                        <TableCell sx={{ color: darkMode ? "#fff" : "#000" }}>{row.timestamp || "N/A"}</TableCell>
+                        <TableCell sx={{ color: darkMode ? "#fff" : "#000" }}>{row.timestampInstant || "N/A"}</TableCell>
                         <TableCell align="right" sx={{ color: darkMode ? "#fff" : "#000" }}>{row.temperature || "N/A"}</TableCell>
                       </TableRow>
                     ))

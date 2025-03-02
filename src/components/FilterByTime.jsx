@@ -4,6 +4,7 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { ThemeContext } from "../context/ThemeContext";
+import { format, utcToZonedTime, zonedTimeToUtc } from "date-fns-tz";
 
 const FilterByTime = ({ setFilteredData, startTime, endTime, setStartTime, setEndTime, triggerFetch }) => {
   const { darkMode } = useContext(ThemeContext);
@@ -27,6 +28,16 @@ const FilterByTime = ({ setFilteredData, startTime, endTime, setStartTime, setEn
     triggerFetch();
   };
 
+  const handleStartTimeChange = (newValue) => {
+    const utcTime = zonedTimeToUtc(newValue, 'UTC');
+    setStartTime(utcTime);
+  };
+
+  const handleEndTimeChange = (newValue) => {
+    const utcTime = zonedTimeToUtc(newValue, 'UTC');
+    setEndTime(utcTime);
+  };
+
   return (
     <Box sx={{ p: 3, mt: 3, border: "1px solid #ddd", borderRadius: "8px", textAlign: "center", backgroundColor: darkMode ? "#1e1e1e" : "#fff" }}>
       <Typography variant="h6" gutterBottom color={darkMode ? "#90caf9" : "black"}>
@@ -35,17 +46,17 @@ const FilterByTime = ({ setFilteredData, startTime, endTime, setStartTime, setEn
 
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <DateTimePicker
-          label="Start Time (IST)"
-          value={startTime}
-          onChange={(newValue) => setStartTime(newValue)}
+          label="Start Time (UTC)"
+          value={startTime ? utcToZonedTime(startTime, 'UTC') : null}
+          onChange={handleStartTimeChange}
           renderInput={(params) => (
             <TextField {...params} sx={{ input: { color: darkMode ? "#e0e0e0" : "black" } }} />
           )}
         />
         <DateTimePicker
-          label="End Time (IST)"
-          value={endTime}
-          onChange={(newValue) => setEndTime(newValue)}
+          label="End Time (UTC)"
+          value={endTime ? utcToZonedTime(endTime, 'UTC') : null}
+          onChange={handleEndTimeChange}
           renderInput={(params) => (
             <TextField {...params} sx={{ input: { color: darkMode ? "#e0e0e0" : "black" }, ml: 2 }} />
           )}

@@ -9,7 +9,7 @@ const DataChart = ({ records }) => {
   if (!records || records.length === 0) return <p>No data available for visualization.</p>;
 
   // Prepare data for the charts
-  const timestamps = records.map(record => record.timestamp);
+  const timestamps = records.map(record => record.timestampInstant);
   const temperatures = records.map(record => record.temperature);
 
   // Line Chart Data
@@ -47,7 +47,7 @@ const DataChart = ({ records }) => {
       {
         label: "Temperature Distribution",
         data: records.map(record => ({
-          x: new Date(record.timestamp).getTime(),
+          x: new Date(record.timestampInstant).getTime(),
           y: record.temperature,
         })),
         backgroundColor: "rgba(255,99,132,1)",
